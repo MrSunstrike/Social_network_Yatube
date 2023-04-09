@@ -123,10 +123,13 @@ def follow_index(request):
 def profile_follow(request, username):
     user = request.user
     author = User.objects.get(username=username)
-    check_relation = Follow.objects.filter(user=user, author=author)
-    if not check_relation:
-        Follow.objects.create(user=user, author=author)
-        return redirect('posts:profile', username=author)
+    if user != author:
+        check_relation = Follow.objects.filter(user=user, author=author)
+        if not check_relation:
+            Follow.objects.create(user=user, author=author)
+            return redirect('posts:profile', username=author)
+        else:
+            return redirect('posts:profile', username=author)
     else:
         return redirect('posts:profile', username=author)
 
