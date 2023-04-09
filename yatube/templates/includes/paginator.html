@@ -1,0 +1,63 @@
+{% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation" class="my-5">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page=1">Первая</a></li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+          Предыдущая
+        </a>
+      </li>
+    {% endif %}
+    {% for i in page_obj.paginator.page_range %}
+        {% if page_obj.number == i %}
+          <li class="page-item active">
+            <span class="page-link">{{ i }}</span>
+          </li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+          </li>
+        {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+          Следующая
+        </a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+          Последняя
+        </a>
+      </li>
+    {% endif %}    
+  </ul>
+</nav>
+{% endif %}
+
+<!--
+{% if page_obj.has_previous %}
+            <a href="/#top" class="btn btn-outline-secondary">Начало</a>
+            <a href="?page={{ page_obj.previous_page_number }}#top" class="btn btn-outline-secondary">Назад</a>
+        {% endif %}
+            <div class="btn-group" role="group" aria-label="Basic example">
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <button class="btn btn-dark disabled">{{ num }}</button>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}#top" class="btn btn-outline-secondary">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+            </div>
+        {% if page_obj.has_next %}
+            {% if not page_obj.number %}
+            <a href="?page={{ 2 }}#top" class="btn btn-outline-secondary">Следующая</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}#top" class="btn btn-outline-secondary">Последняя</a>
+            {% endif %}
+            {% if page_obj.number %}
+            <a href="?page={{ page_obj.next_page_number }}#top" class="btn btn-outline-secondary">Следующая</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}#top" class="btn btn-outline-secondary">Последняя</a>
+            {% endif %}
+        {% endif %}
+-->

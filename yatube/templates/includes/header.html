@@ -1,0 +1,62 @@
+{% url 'posts:index' as index %}
+{% url 'posts:post_create' as create %}
+{% url 'about:author' as author %}
+{% url 'about:tech' as tech %}
+{% url 'users:password_change_form' as change %}
+{% url 'users:login' as login %}
+{% url 'users:signup' as signup %}
+{% load static %}
+<nav class="navbar navbar-expand-md navbar-dark" style="background-color: lightskyblue">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'posts:index' %}">
+        <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+        <span style="color:red">Ya</span>tube
+    </a>
+    <button class="navbar-toggler" 
+            type="button" 
+            data-toggle="collapse" 
+            data-target="#navbarsExample04" 
+            aria-controls="navbarsExample04" 
+            aria-expanded="false" 
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExample04">
+      <ul class="navbar-nav">
+        <li class="nav-item {% if request.path == index %}active{% endif %}">
+            <a class="nav-link link-light" href="{% url 'posts:index' %}">Главная</a>
+        </li>
+        <li class="nav-item {% if request.path == author %}active{% endif %}">
+          <a class="nav-link link-light" href="{% url 'about:author' %}">Об авторе</a>
+        </li>
+        <li class="nav-item {% if request.path == tech %}active{% endif %}">
+          <a class="nav-link link-light" href="{% url 'about:tech' %}">Технологии</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        {% if user.is_authenticated %}
+        <li class="form-inline">
+            <span class="form-inline mr-2">{{ user.username }}</span>
+        </li>
+        <li class="nav-item {% if request.path == create %}active{% endif %}">
+            <a class="nav-link link-light" href="{% url 'posts:post_create' %}">Новая запись</a>
+        </li>
+        <li class="nav-item {% if request.path == change %}active{% endif %}"> 
+            <a class="nav-link link-light" href="{% url 'users:password_change_form' %}">Изменить пароль</a>
+        </li>
+        <li class="nav-item"> 
+          <a class="nav-link link-light" href="{% url 'users:logout' %}">Выйти</a>
+        </li>
+        {% else %}
+        <li class="nav-item {% if request.path == login %}active{% endif %}"> 
+          <a class="nav-link link-light" href="{% url 'users:login' %}">Войти</a>
+        </li>
+        <li class="nav-item {% if request.path == signup %}active{% endif %}"> 
+          <a class="nav-link link-light" href="{% url 'users:signup' %}">Регистрация</a>
+        </li>
+        </ul>
+        {% endif %}
+    </div>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  </div>
