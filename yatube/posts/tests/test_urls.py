@@ -37,29 +37,35 @@ class PostURLTests(TestCase):
 
     def test_urls_response_for_guest(self):
         """
-        Проверка доступов у неавторизованного пользователя к страницам
-        приложения posts
+        Проверяет доступ неавторизованного пользователя к страницам приложения
+        posts.
+
+        Под неавторизованным пользователем выполняет GET-запросы на страницы
+        приложения posts.
+        Проверяет коды ответов сервера и, при необходимости, перенаправления.
+
+        :return: None
         """
         response_urls = {
-            '/': 'OK',
-            '/group/test/': 'OK',
-            '/profile/Author/': 'OK',
-            '/posts/1/': 'OK',
-            '/posts/1/edit/': 'FOUND',  # Этот отправляет на login
-            '/create/': 'FOUND',  # И вот этот. Я что-то забыл?
-            '/unexisting_page/': 'NOT_FOUND'
+            '/': HTTPStatus.OK,
+            '/group/test/': HTTPStatus.OK,
+            '/profile/Author/': HTTPStatus.OK,
+            '/posts/1/': HTTPStatus.OK,
+            '/posts/1/edit/': HTTPStatus.FOUND,
+            '/create/': HTTPStatus.FOUND,
+            '/unexisting_page/': HTTPStatus.NOT_FOUND
         }
         for address, status in response_urls.items():
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
                 self.assertEqual(
-                    HTTPStatus(response.status_code).name,
+                    HTTPStatus(response.status_code),
                     status,
                     'У неавторизованного пользователя некорректный доступ '
                     f'по адресу "{address}"! Должен быть {status}, а '
-                    f'получен {HTTPStatus(response.status_code).name}'
+                    f'получен {HTTPStatus(response.status_code)}'
                 )
-                if status == 'FOUND':
+                if status == HTTPStatus.FOUND:
                     self.assertIn(
                         response['Location'],
                         ['/auth/login/?next=/posts/1/edit/',
@@ -73,28 +79,34 @@ class PostURLTests(TestCase):
                     )
 
     def test_urls_response_for_auth(self):
-        '''
-        Проверка доступов у авторизованного пользователя к страницам
-        приложения posts
-        '''
+        """
+        Проверяет доступ авторизованного пользователя к страницам приложения
+        posts.
+
+        Под авторизованным пользователем выполняет GET-запросы на страницы
+        приложения posts.
+        Проверяет коды ответов сервера и, при необходимости, перенаправления.
+
+        :return: None
+        """
         response_urls = {
-            '/': 'OK',
-            '/group/test/': 'OK',
-            '/profile/Author/': 'OK',
-            '/posts/1/': 'OK',
-            '/posts/1/edit/': 'FOUND',
-            '/create/': 'OK',
-            '/unexisting_page/': 'NOT_FOUND'
+            '/': HTTPStatus.OK,
+            '/group/test/': HTTPStatus.OK,
+            '/profile/Author/': HTTPStatus.OK,
+            '/posts/1/': HTTPStatus.OK,
+            '/posts/1/edit/': HTTPStatus.FOUND,
+            '/create/': HTTPStatus.OK,
+            '/unexisting_page/': HTTPStatus.NOT_FOUND
         }
         for address, status in response_urls.items():
             with self.subTest(address=address):
                 response = self.auth_client.get(address)
                 self.assertEqual(
-                    HTTPStatus(response.status_code).name,
+                    HTTPStatus(response.status_code),
                     status,
                     'У авторизованного пользователя некорректный доступ '
                     f'по адресу "{address}"! Должен быть {status}, а '
-                    f'получен {HTTPStatus(response.status_code).name}'
+                    f'получен {HTTPStatus(response.status_code)}'
                 )
                 if status == 'FOUND':
                     self.assertEqual(
@@ -107,7 +119,15 @@ class PostURLTests(TestCase):
                     )
 
     def test_edit_page_response_for_author(self):
-        '''Проверка доступа к редактированию поста у автора'''
+        """
+        Проверяет доступ автора к редактированию поста.
+
+        Под авторизованным пользователем-автором выполняет GET-запрос на
+        страницу редактирования своего поста. Проверяет, что сервер возвращает
+        успешный ответ (код 200).
+
+        :return: None
+        """
         response = self.auth_client_author.get('/posts/1/edit/')
         self.assertEqual(
             HTTPStatus(response.status_code).name,
@@ -116,10 +136,17 @@ class PostURLTests(TestCase):
         )
 
     def test_urls_uses_correct_template(self):
-        '''
-        Проверка использования соответствующих шаблонов на страницах
-        приложения posts
-        '''
+        """
+        Проверяет использование соответствующих шаблонов на страницах
+        приложения posts.
+
+        Для каждого URL-адреса в url_template_names проверяется, что
+        возвращаемый
+        ответ использует правильный шаблон. При несоответствии выводится
+        сообщение об ошибке.
+
+        :return: None
+        """
         url_template_names = {
             '/': 'posts/index.html',
             '/group/test/': 'posts/group_list.html',

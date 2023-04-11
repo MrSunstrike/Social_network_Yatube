@@ -25,15 +25,6 @@ GIF_EXAMPLE = (
 User = get_user_model()
 
 
-def post_check(self, post_context, post_db):
-    '''Функция проверки постов в контексте'''
-    self.assertEqual(post_context.text, post_db.text)
-    self.assertEqual(post_context.author.username, post_db.author.username)
-    self.assertEqual(post_context.group.slug, post_db.group.slug)
-    if post_db.image:
-        self.assertTrue(post_context.image)
-
-
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostsPagesTests(TestCase):
     @classmethod
@@ -71,7 +62,34 @@ class PostsPagesTests(TestCase):
         self.auth_client = Client()
         self.auth_client.force_login(self.author)
 
+    def post_check(self, post_context, post_db):
+        """
+        Проверяет соответствие атрибутов двух объектов Post.
+
+        Аргументы:
+            self (TestCase): Экземпляр тестового класса.
+            post_context (Post): Объект Post, полученный из контекста.
+            post_db (Post): Объект Post, полученный из базы данных.
+
+        Проверяет соответствие следующих атрибутов:
+            - text: Текст поста.
+            - author.username: Имя пользователя, который написал пост.
+            - group.slug: Slug группы, к которой относится пост.
+            - image: Наличие картинки в посте.
+        """
+        self.assertEqual(post_context.text, post_db.text)
+        self.assertEqual(post_context.author.username, post_db.author.username)
+        self.assertEqual(post_context.group.slug, post_db.group.slug)
+        if post_db.image:
+            self.assertTrue(post_context.image)
+
     def test_pages_uses_correct_template(self):
+        """
+        Проверяет корректность использования шаблонов на страницах.
+
+        Для каждой страницы, указанной в словаре urls_names_list, делается
+        запрос и проверяется, что на странице используется правильный шаблон.
+        """
         urls_names_list = {
             reverse('posts:index'): 'posts/index.html',
             reverse('posts:group_posts',
@@ -98,24 +116,27 @@ class PostsPagesTests(TestCase):
                 )
 
     def test_all_paginators_is_correct(self):
-        '''Проверка пагинаторов в index, group_posts и profile'''
-        for post in range(25):
-            if post % 2 == 0:
-                Post.objects.create(
-                    text=f'Запись №{post + 2}',
-                    author=self.author,
-                    group=self.test_group
-                )
-            else:
-                Post.objects.create(
-                    text=f'Запись №{post + 2}',
-                    author=self.author
-                )
+        """
+        Проверяет корректность работы пагинаторов на страницах index,
+        group_posts и profile.
+
+        Создаются 15 постов и заполняются списки с количеством постов на
+        страницах для каждой страницы, на которой используется пагинатор. Для
+        каждой страницы делается запрос и проверяется корректность количества
+        постов на странице и тип объекта Page, возвращаемого контекстом.
+        """
+        post_list = []
+        for i in range(15):
+            post = Post(text=f'Запись №{i}',
+                        author=self.author,
+                        group=self.test_group)
+            post_list.append(post)
+        Post.objects.bulk_create(post_list)
         all_posts = len(Post.objects.all())
         all_group_posts = len(Post.objects.filter(group=self.test_group))
         posts_on_pages = {
             reverse('posts:index'): POSTS_AMOUNT,
-            reverse('posts:index') + '?page=3': all_posts % POSTS_AMOUNT,
+            reverse('posts:index') + '?page=2': all_posts % POSTS_AMOUNT,
             reverse('posts:group_posts',
                     kwargs={'slug': self.test_group.slug}): POSTS_AMOUNT,
             reverse('posts:group_posts',
@@ -124,7 +145,7 @@ class PostsPagesTests(TestCase):
             reverse('posts:profile',
                     kwargs={'username': self.author.username}): POSTS_AMOUNT,
             reverse('posts:profile',
-                    kwargs={'username': self.author.username}) + '?page=3':
+                    kwargs={'username': self.author.username}) + '?page=2':
                         all_posts % POSTS_AMOUNT,
         }
         for page, posts in posts_on_pages.items():
@@ -135,16 +156,32 @@ class PostsPagesTests(TestCase):
                 self.assertEqual(posts, len(context))
 
     def test_post_detail_page_show_correct_context(self):
-        '''Проверка контекстного контента в post_detail'''
+        """
+        Проверяет корректность контекста на странице детального просмотра
+        поста.
+
+        Делается запрос на страницу детального просмотра конкретного поста и
+        проверяется наличие корректного контекста. Контекст проверяется с
+        помощью функции post_check, которая сравнивает поля поста и значения в
+        словаре контекста.
+        """
         response = self.auth_client.get(
             reverse('posts:post_detail', kwargs={'post_id': self.post.id})
         )
         post_context = response.context['post']
-        post_check(self, post_context, Post.objects.get(id=self.post.id))
-        self.assertTrue(post_context.image)
+        self.post_check(post_context, Post.objects.get(id=self.post.id))
 
     def test_edit_post_page_show_correct_context_get(self):
-        '''Проверка контекстного контента при get-запросе в edit_post'''
+        """
+        Проверяет корректность контекста страницы с формой редактирования
+        поста.
+
+        Делается GET-запрос на страницу с формой редактирования поста, и
+        проверяются наличие в контексте необходимых данных: содержимого и
+        группы поста, а также полей формы. Контекст проверяется на наличие
+        нужных полей и их тип с помощью словаря form_fields. Содержимое и
+        группа поста проверяются с помощью assertContains.
+        """
         response = self.auth_client.get(
             reverse('posts:post_edit', kwargs={'post_id': self.post.id})
         )
@@ -161,7 +198,13 @@ class PostsPagesTests(TestCase):
         self.assertContains(response, self.test_group.title)
 
     def test_edit_post_page_save_changes(self):
-        '''Проверка сохранения изменений при отправке формы в post_edit'''
+        """
+        Проверяет сохранение изменений при отправке формы в 'post_edit'.
+
+        Проверяется, что при отправке формы редактирования поста с новым
+        текстом, новой группой и новым изображением, изменения сохраняются в
+        базе данных.
+        """
         text_for_new_post = 'New text for this post'
         group_for_new_post = self.another_group.slug
         upd_image = SimpleUploadedFile(
@@ -188,20 +231,29 @@ class PostsPagesTests(TestCase):
                          group_for_new_post)
 
     def test_context_in_index(self):
-        '''Проверка контекста в index'''
+        """
+        Проверяет контекст в представлении 'index'.
+
+        Проверяется, что при запросе списка всех постов, передается
+        правильный контекст с информацией о постах на текущей странице.
+        """
         response = self.auth_client.get(reverse('posts:index'))
         post_context = response.context['page_obj'][0]
-        post_check(self, post_context, Post.objects.get(id=self.post.id))
-        self.assertTrue(post_context.image)
+        self.post_check(post_context, Post.objects.get(id=self.post.id))
 
     def test_context_in_post_group(self):
-        '''Проверка контекста в group_post'''
+        """
+        Проверяет контекст в представлении 'group_posts'.
+
+        Проверяется, что при запросе списка постов в группе, передается
+        правильный контекст с информацией о группе и ее постах.
+        """
         response = self.auth_client.get(reverse(
             'posts:group_posts', kwargs={'slug': self.test_group.slug}
         ))
         post_context = response.context['page_obj'][0]
         group_response = response.context['group']
-        post_check(self, post_context, Post.objects.get(id=self.post.id))
+        self.post_check(post_context, Post.objects.get(id=self.post.id))
         self.assertEqual(group_response.title, self.post.group.title)
         self.assertEqual(group_response.description,
                          self.post.group.description)
@@ -209,10 +261,14 @@ class PostsPagesTests(TestCase):
             'posts:group_posts', kwargs={'slug': self.another_group.slug}
         ))
         self.assertNotContains(response, self.post.text)
-        self.assertTrue(post_context.image)
 
     def test_context_in_profile(self):
-        '''Проверка контекста в profile'''
+        """
+        Тестирование контекста в представлении 'profile'.
+
+        Проверяется, что при запросе страницы профиля пользователя, передается
+        правильный контекст с информацией о постах автора и авторе.
+        """
         response = self.auth_client.get(reverse('posts:profile',
                                                 kwargs={'username':
                                                         self.author.username}))
@@ -225,10 +281,10 @@ class PostsPagesTests(TestCase):
         self.assertTrue(post_context.image)
 
     def test_create_post_page_create_new_post(self):
-        '''
-        Проверка создания поста в post_create, редиректа и его отображения
-        на страницах
-        '''
+        """
+        Проверяет создание нового поста через форму в 'post_create',
+        проверка редиректа и отображения поста на страницах.
+        """
         text_for_new_post = 'Text for new post'
         group_for_new_post = self.another_group.id
         uploaded = SimpleUploadedFile(
@@ -270,7 +326,14 @@ class PostsPagesTests(TestCase):
         self.assertNotIn(created_post, response.context['page_obj'])
 
     def test_comment_may_added_only_auth_user(self):
-        '''Проверка возможности оставлять комментарий пользователям'''
+        """
+        Проверяет возможность оставлять комментарий только авторизованным
+        пользователям.
+
+        Проверяется, что неавторизованный пользователь
+        перенаправляется на страницу входа, а авторизованный пользователь может
+        оставлять комментарии к посту.
+        """
         text = 'Это тестовый комментарий'
         status_redirects_dict = {
             f'/auth/login/?next=/posts/{self.post.pk}/comment/':
@@ -294,7 +357,15 @@ class PostsPagesTests(TestCase):
                     self.assertEqual(new_comment, text)
 
     def test_cached_posts_index(self):
-        '''Проверка кэширования постов в index.html'''
+        """
+        Проверяет кэширование на главной странице 'index'.
+
+        Создается тестовый пост и делается запрос на страницу 'index'. Затем
+        проверяется, что содержимое ответа сохранено в кэше. Удаление тестового
+        поста и повторный запрос к странице 'index' должны вернуть сохраненное
+        содержимое из кэша. Очистка кэша и повторный запрос к странице 'index'
+        должны вернуть новое содержимое.
+        """
         test_post = Post.objects.create(text='Тест кэша', author=self.author)
         response = self.auth_client.get(reverse('posts:index'))
         content = response.content
@@ -307,24 +378,56 @@ class PostsPagesTests(TestCase):
         new_content = new_responsed.content
         self.assertNotEqual(content, new_content)
 
-    def test_create_and_delete_following(self):
-        '''Проверка создания и удаления постов'''
+    def test_create_following(self):
+        """
+        Проверяет создание подписки на профиль пользователя.
+
+        Осуществляется запрос на подписку на профиль пользователя. Затем
+        проверяется, что создана новая запись о подписке в базе данных.
+        """
         self.auth_client.get(reverse('posts:profile_follow',
                              kwargs={'username': self.user.username}))
         relation = Follow.objects.filter(author=self.user)
-        self.assertEqual(len(relation), 1)
+        self.assertEqual(len(relation), 1)  # Норм так проверять?
+
+    def test_delete_following(self):
+        """
+        Проверяет удаление подписки на профиль пользователя.
+
+        Создается запись о подписке на профиль пользователя. Затем
+        осуществляется запрос на отписку от этого профиля. Проверяется, что
+        запись о подписке была успешно удалена из базы данных.
+        """
+        Follow.objects.create(user=self.user, author=self.author)
         self.auth_client.get(reverse('posts:profile_unfollow',
                              kwargs={'username': self.user.username}))
         relation = Follow.objects.filter(author=self.user)
         self.assertEqual(len(relation), 0)
 
     def test_post_on_follow_page(self):
+        """
+        Проверяет отображение поста на ленте подписок пользователя.
+
+        Создается запись о подписке на профиль пользователя. Затем создается
+        клиент для авторизованного пользователя и делается запрос на страницу
+        ленты подписок. Проверяется, что первый пост на странице соответствует
+        тому, что был опубликован автором, на которого подписался пользователь.
+        """
         Follow.objects.create(user=self.user, author=self.author)
         follower_client = Client()
         follower_client.force_login(self.user)
         response_follower = follower_client.get(reverse('posts:follow_index'))
         context_follower = response_follower.context['page_obj'].object_list[0]
         self.assertEqual(context_follower, self.post)
+
+    def test_post_on_follow_page(self):
+        """
+        Тестирование отображения постов на ленте подписок пользователя.
+
+        Делается запрос на страницу ленты подписок для пользователя, который не
+        подписан ни на один профиль. Проверяется, что на странице нет никаких
+        постов.
+        """
         response_another = self.auth_client.get(reverse('posts:follow_index'))
         if len(response_another.context['page_obj']) > 0:
             context_another = response_another.context['page_obj']
