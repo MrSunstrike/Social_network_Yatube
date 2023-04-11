@@ -49,7 +49,7 @@
     {% endif %}
     {% load user_filters %}
     {% if user.is_authenticated %}
-      <div class="card my-4">
+      <div class="card my-5">
         <h5 class="card-header">Добавить комментарий:</h5>
         <div class="card-body">
           <form method="post" action="{% url 'posts:add_comment' post.id %}">
@@ -64,16 +64,30 @@
     {% endif %}
 
     {% for comment in comments %}
-      <div class="media mb-4">
-        <div class="media-body">
-          <h5 class="mt-0">
-            <a href="{% url 'posts:profile' comment.author.username %}">
-              {{ comment.author.username }}
-            </a>
-          </h5>
-          <p>
-            {{ comment.text }}
-          </p>
+      <div class="card mt-2">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-sm-6">
+              <small class="text-muted">Автор: 
+                <a href="{% url 'posts:profile' comment.author.username %}">
+                  {{ comment.author.username }}
+                </a>
+              </small><br>
+              <small class="text-muted">{{ comment.created }}</small>
+            </div>
+            {% if comment.author == request.user %}
+            <div class="col-sm-6 text-right">
+              <small>
+              <a href="{% url 'posts:remove_comment' comment.pk %}" title="Удалить пост">
+                Удалить комментарий
+              </a>
+            </small>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-text">{{ comment.text }}</p>
         </div>
       </div>
     {% endfor %}

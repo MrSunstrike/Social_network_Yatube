@@ -1,5 +1,5 @@
 {% load thumbnail %}
-<article>
+<!--<article>
   <ul>
     <li>
       Автор: {{ post.author }}
@@ -18,4 +18,49 @@
   <a href="{% url 'posts:post_detail' post.pk %}">
     подробная информация
   </a>
-</article>
+  {% if post.group %}   
+      <a href="{% url 'posts:group_posts' post.group.slug %}">
+        все записи группы
+      </a>
+  {% endif %} 
+</article>-->
+
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between">
+    <div>
+      <strong>Автор:</strong>
+      <a href="{% url 'posts:profile' post.author.username %}">
+      <span>{{ post.author }}</span>
+      </a>
+      <br>
+      <strong>Опубликовано:</strong> {{ post.created|date:"d E Y" }}
+      {% if post.group %}   
+      <br>
+      <strong>Категория:</strong>
+      <a href="{% url 'posts:profile' post.author.username %}">
+      <span>{{ post.group.title }}</span>
+      </a>
+      {% endif %} 
+    </div>
+    <div>
+      {% if post.author == request.user %}
+      <a href="{% url 'posts:post_edit' post.pk %}" title="Редактировать пост">
+        <i class="bi bi-pencil-square mr-1"></i>
+      </a>
+      <a href="{% url 'posts:post_remove' post.pk %}" title="Удалить пост">
+        <i class="bi bi-x-lg"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card-body">
+    <p class="card-text">{{ post.text }}</p>
+    {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+      <img class="card-img my-2" src="{{ im.url }}">
+    {% endthumbnail %}
+    <hr>
+    <a href="{% url 'posts:post_detail' post.pk %}" class="btn btn-primary">К посту</a>
+  </div>
+</div>
+
+
