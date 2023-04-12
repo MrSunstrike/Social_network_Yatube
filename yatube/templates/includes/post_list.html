@@ -37,19 +37,19 @@
       {% if post.group %}   
       <br>
       <strong>Категория:</strong>
-      <a href="{% url 'posts:profile' post.author.username %}">
+      <a href="{% url 'posts:group_posts' post.group.slug %}">
       <span>{{ post.group.title }}</span>
       </a>
       {% endif %} 
     </div>
     <div>
       {% if post.author == request.user %}
-      <a href="{% url 'posts:post_edit' post.pk %}" title="Редактировать пост">
+      <h4><a href="{% url 'posts:post_edit' post.pk %}" title="Редактировать пост">
         <i class="bi bi-pencil-square mr-1"></i>
       </a>
       <a href="{% url 'posts:post_remove' post.pk %}" title="Удалить пост">
         <i class="bi bi-x-lg"></i>
-      </a>
+      </a></h4>
       {% endif %}
     </div>
   </div>
@@ -59,7 +59,7 @@
       <img class="card-img my-2" src="{{ im.url }}">
     {% endthumbnail %}
     <hr>
-    <a href="{% url 'posts:post_detail' post.pk %}" class="btn btn-primary">К посту</a>
+    <a href="{% url 'posts:post_detail' post.pk %}" class="btn btn-primary">Подробнее</a>
   </div>
 </div>
 

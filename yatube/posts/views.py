@@ -69,10 +69,9 @@ def profile(request, username):
     """
     author = User.objects.get(username=username)
     posts = Post.objects.filter(author=author)
-    relation = None
-    if request.user.is_authenticated:
-        relation = Follow.objects.filter(user=request.user, author=author)
-    following = True if relation else False
+    following = request.user.is_authenticated and Follow.objects.filter(
+        user=request.user, author=author
+        )
     context = {
         'author': author,
         'page_obj': paginator(request, posts, POSTS_AMOUNT),
@@ -196,9 +195,9 @@ def post_remove(request, post_id):
     """
     current_url = request.META.get('HTTP_REFERER')
     try:
-        post = get_object_or_404(Post, id=post_id)
+        post = get_object_or_404(Post, pk=post_id)
     except Http404:
-        raise Http404("Запись не найдена")
+        return redirect(current_url)
     else:
         if request.user == post.author:
             post.delete()
@@ -248,9 +247,9 @@ def remove_comment(request, comment_id):
     """
     current_url = request.META.get('HTTP_REFERER')
     try:
-        comment = get_object_or_404(Comment, id=comment_id)
+        comment = get_object_or_404(Comment, pk=comment_id)
     except Http404:
-        raise Http404("Запись не найдена")
+        return redirect(current_url)
     else:
         if request.user == comment.author:
             comment.delete()
@@ -276,7 +275,9 @@ def follow_index(request):
     all_following = Follow.objects.filter(user=request.user)
     author_list = all_following.values_list('author', flat=True)
     posts = Post.objects.filter(author__in=author_list)
-    context = {'page_obj': paginator(request, posts, POSTS_AMOUNT)}
+    is_following = True if len(posts) > 0 else False
+    context = {'page_obj': paginator(request, posts, POSTS_AMOUNT),
+               'is_following': is_following}
     template = 'posts/follow.html'
     return render(request, template, context)
 

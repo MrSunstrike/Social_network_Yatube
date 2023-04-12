@@ -7,17 +7,22 @@
 {% endblock %}
 {% block content %}
   {% include 'includes/switcher.html' %}
+  {% if is_following %}
   {% load cache %}
   {% cache 20 "index_page_"|add:page_obj.number page_obj %}
     {% for post in page_obj %}
     {% include 'includes/post_list.html' %}
-      {% if post.group %}   
-      <a href="{% url 'posts:group_posts' post.group.slug %}">
-        все записи группы
-      </a>
-    {% endif %} 
-    {% if not forloop.last %}<hr>{% endif %}
     {% endfor %}
   {% endcache %}
 {% include 'includes/paginator.html' %}
+{% else %}
+<div class="card mb-4">
+  <div class="card-header">
+    <strong>У вас нет избранных авторов</strong>
+  </div>
+  <div class="card-body">
+    <p>Подпишитесь на других авторов и отслеживайте их публикации на этой страничке</p>
+  </div>
+</div>
+{% endif %}
 {% endblock content %}

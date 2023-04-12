@@ -206,7 +206,7 @@ class PostsPagesTests(TestCase):
         базе данных.
         """
         text_for_new_post = 'New text for this post'
-        group_for_new_post = self.another_group.slug
+        group_for_new_post = self.another_group.id
         upd_image = SimpleUploadedFile(
             name='upd.gif',
             content=GIF_EXAMPLE,
@@ -227,7 +227,7 @@ class PostsPagesTests(TestCase):
         )
         self.assertEqual(Post.objects.get(id=self.post.id).text,
                          text_for_new_post)
-        self.assertEqual(Post.objects.get(id=self.post.id).group.slug,
+        self.assertEqual(Post.objects.get(id=self.post.id).group.id,
                          group_for_new_post)
 
     def test_context_in_index(self):
