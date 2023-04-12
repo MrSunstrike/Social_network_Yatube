@@ -387,8 +387,9 @@ class PostsPagesTests(TestCase):
         """
         self.auth_client.get(reverse('posts:profile_follow',
                              kwargs={'username': self.user.username}))
-        relation = Follow.objects.filter(author=self.user)
-        self.assertEqual(len(relation), 1)  # Норм так проверять?
+        relation = Follow.objects.filter(author=self.user,
+                                         user=self.author).exists()
+        self.assertTrue(relation)
 
     def test_delete_following(self):
         """
@@ -401,12 +402,14 @@ class PostsPagesTests(TestCase):
         Follow.objects.create(user=self.user, author=self.author)
         self.auth_client.get(reverse('posts:profile_unfollow',
                              kwargs={'username': self.user.username}))
-        relation = Follow.objects.filter(author=self.user)
-        self.assertEqual(len(relation), 0)
+        relation = Follow.objects.filter(author=self.user,
+                                         user=self.author).exists()
+        self.assertFalse(relation)
 
     def test_post_on_follow_page(self):
         """
-        Проверяет отображение поста на ленте подписок пользователя.
+        Проверяет отображение поста на ленте подписок пользователя, который
+        подписан на автора тестового поста.
 
         Создается запись о подписке на профиль пользователя. Затем создается
         клиент для авторизованного пользователя и делается запрос на страницу
@@ -422,14 +425,17 @@ class PostsPagesTests(TestCase):
 
     def test_post_on_follow_page(self):
         """
-        Тестирование отображения постов на ленте подписок пользователя.
+        Проверяет отображение постов на ленте подписок пользователя, который не 
+        подписан ни на один профиль.
 
-        Делается запрос на страницу ленты подписок для пользователя, который не
-        подписан ни на один профиль. Проверяется, что на странице нет никаких
-        постов.
+        Создается пользователь и происходит вход под его учетной записью.
+        Указанный пользователь не подписывается на другие профили. Затем
+        производится запрос на страницу ленты подписок и проверяется, что на
+        странице не отображаются никакие посты.
         """
-        response_another = self.auth_client.get(reverse('posts:follow_index'))
-        if len(response_another.context['page_obj']) > 0:
-            context_another = response_another.context['page_obj']
-            post_context = context_another.object_list[0]
-            self.assertNotEqual(post_context, self.post)
+        another_author = User.objects.create_user(username='another')
+        another_client = Client()
+        another_client.force_login(another_author)
+        response_another = another_client.get(reverse('posts:follow_index'))
+        context_another = response_another.context['page_obj']
+        self.assertQuerysetEqual(context_another, [])
