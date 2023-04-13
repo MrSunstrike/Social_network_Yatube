@@ -45,7 +45,7 @@
    {% endif %}
 </div>
 {% for post in page_obj %}
-{% include 'includes/post_list.html' %}
+{% include 'includes/post_list.html' with show_author=False show_category=True %}
 {% endfor %} 
 {% include 'includes/paginator.html' %}          
 <hr>

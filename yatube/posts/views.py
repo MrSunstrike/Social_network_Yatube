@@ -135,8 +135,6 @@ def post_create(request):
             post = Post(text=text, group=group, author=user, image=image)
             post.save()
             return redirect('posts:profile', user.username)
-        return render(request, template, {'form': form})
-
     return render(request, template, {'form': form})
 
 
@@ -197,13 +195,11 @@ def post_remove(request, post_id):
     try:
         post = get_object_or_404(Post, pk=post_id)
     except Http404:
-        return redirect(current_url)
+        pass
     else:
         if request.user == post.author:
             post.delete()
-            return redirect(current_url)
-        else:
-            return redirect(current_url)
+    return redirect(current_url)
 
 
 @login_required
@@ -249,13 +245,11 @@ def remove_comment(request, comment_id):
     try:
         comment = get_object_or_404(Comment, pk=comment_id)
     except Http404:
-        return redirect(current_url)
+        pass
     else:
         if request.user == comment.author:
             comment.delete()
-            return redirect(current_url)
-        else:
-            return redirect(current_url)
+    return redirect(current_url)
 
 
 @login_required
@@ -302,11 +296,8 @@ def profile_follow(request, username):
         check_relation = Follow.objects.filter(user=user, author=author)
         if not check_relation:
             Follow.objects.create(user=user, author=author)
-            return redirect('posts:profile', username=author)
-        else:
-            return redirect('posts:profile', username=author)
-    else:
-        return redirect('posts:profile', username=author)
+    # Спасибо, везде почистил лишние else и return
+    return redirect('posts:profile', username=author)
 
 
 @login_required
@@ -329,6 +320,4 @@ def profile_unfollow(request, username):
     if check_relation:
         following = Follow.objects.get(user=user, author=author)
         following.delete()
-        return redirect('posts:profile', username=author)
-    else:
-        return redirect('posts:profile', username=author)
+    return redirect('posts:profile', username=author)

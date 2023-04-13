@@ -10,7 +10,7 @@
   {% load cache %}
   {% cache 20 "index_page_"|add:page_obj.number page_obj %}
     {% for post in page_obj %}
-    {% include 'includes/post_list.html' %}
+    {% include 'includes/post_list.html' with show_author=True show_category=True %}
     {% endfor %}
   {% endcache %}
 {% include 'includes/paginator.html' %}
