@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from core.modules.paginator import paginator
@@ -192,13 +191,11 @@ def post_remove(request, post_id):
         является автором поста, он также перенаправляется на эту же страницу.
     """
     current_url = request.META.get('HTTP_REFERER')
-    try:
-        post = get_object_or_404(Post, pk=post_id)
-    except Http404:
-        pass
-    else:
-        if request.user == post.author:
-            post.delete()
+    # Этой конструкцией я пытался изящно решить проблемы, связанные с кэшем
+    # Но ок, пусть пользователя кидает на 404
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user == post.author:
+        post.delete()
     return redirect(current_url)
 
 
@@ -242,13 +239,9 @@ def remove_comment(request, comment_id):
         страницу.
     """
     current_url = request.META.get('HTTP_REFERER')
-    try:
-        comment = get_object_or_404(Comment, pk=comment_id)
-    except Http404:
-        pass
-    else:
-        if request.user == comment.author:
-            comment.delete()
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user == comment.author:
+        comment.delete()
     return redirect(current_url)
 
 
