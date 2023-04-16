@@ -30,23 +30,23 @@
         <li class="nav-item {% if request.path == author %}active{% endif %}">
           <a class="nav-link link-light" href="{% url 'about:author' %}">Об авторе</a>
         </li>
+        <!--
         <li class="nav-item {% if request.path == tech %}active{% endif %}">
           <a class="nav-link link-light" href="{% url 'about:tech' %}">Технологии</a>
-        </li>
+        </li>-->
       </ul>
       <ul class="navbar-nav ml-auto">
         {% if user.is_authenticated %}
-        <li class="form-inline">
-            <span class="form-inline mr-2">{{ user.username }}</span>
-        </li>
-        <li class="nav-item {% if request.path == create %}active{% endif %}">
-            <a class="nav-link link-light" href="{% url 'posts:post_create' %}">Новая запись</a>
-        </li>
-        <li class="nav-item {% if request.path == change %}active{% endif %}"> 
-            <a class="nav-link link-light" href="{% url 'users:password_change_form' %}">Изменить пароль</a>
-        </li>
-        <li class="nav-item"> 
-          <a class="nav-link link-light" href="{% url 'users:logout' %}">Выйти</a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <strong>Профиль:</strong> {{ user.username }}
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'posts:post_create' %}">Новая запись</a>
+            <a class="dropdown-item" href="{% url 'users:password_change_form' %}">Изменить пароль</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{% url 'users:logout' %}">Выйти</a>
+          </div>
         </li>
         {% else %}
         <li class="nav-item {% if request.path == login %}active{% endif %}"> 
@@ -58,5 +58,4 @@
         </ul>
         {% endif %}
     </div>
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
   </div>

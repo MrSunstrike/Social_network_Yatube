@@ -3,38 +3,31 @@
 Об авторе
 {% endblock title %}
 {% block content %}
-<div class="row">
-    <div class="col-1"></div>
-    <div class="col-4">
-        <h1 style="margin-top: 20%;">Обо мне</h1>
-        <p>
-        Привет, меня зовут Никитин Михаил, но в сети предпочитаю использовать
-        никнейм Mr.Sunstrike
-        </p>
-        <br>
-        <p>
-        Сейчас я изучаю новую профессию - Backend-разработчик на языке
-        программирования Python. Мне очень нравится писать код и решать
-        сложные задачки. Уже не терпится вступить в ряды настоящих
-        программистов и радовать мир своими проектами
-        </p>
-        <br>
-        <center>
-            <a style='text-decoration: none' 
-               href='https://www.instagram.com/mr.sunstrike/'>
-                <img style="margin-right: 35px" 
-                     src="/static/img/about/social_icon/Instagram.png" 
-                     width="50">
-            </a>
-            <a style='text-decoration: none' 
-               href='https://www.linkedin.com/in/mikhail-nikitin-7168a925b/'>
-                <img src="/static/img/about/social_icon/Linkedin.png" 
-                     width="50">
-            </a>
-       </center>
-    </div>
-    <div class="col-7">
-        <center><img src="/static/img/about/photo.png" alt="Mr.Sunstrike" width="500"></center>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 order-md-2">
+            <img src="/static/img/about/photo.png" alt="Mr.Sunstrike" class="img-fluid">
+        </div>
+        <div class="col-md-6 order-md-1">
+            <h1 class="mt-5">Обо мне</h1>
+            <p class="lead">
+                Привет, меня зовут Никитин Михаил, но в сети предпочитаю использовать никнейм Mr.Sunstrike.</p>
+                <p class="lead">
+                Сейчас я изучаю новую профессию - Backend-разработчик на языке программирования Python. Мне очень нравится писать код и решать сложные задачки. Уже не терпится вступить в ряды настоящих программистов и радовать мир своими проектами.
+            </p>
+            <ul class="list-inline d-flex justify-content-center">
+                <li class="list-inline-item">
+                    <a class="text-secondary mr-3 text-decoration-none social-icon" href="https://www.instagram.com/mr.sunstrike/">
+                        <img src="/static/img/about/social_icon/Instagram.png" width="50" alt="Instagram">
+                    </a>
+                </li>
+                <li class="list-inline-item">
+                    <a class="text-secondary ml-3 text-decoration-none social-icon" href="https://www.linkedin.com/in/mikhail-nikitin-7168a925b/">
+                        <img src="/static/img/about/social_icon/Linkedin.png" width="50" alt="LinkedIn">
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
-{% endblock content%}
+{% endblock content %}

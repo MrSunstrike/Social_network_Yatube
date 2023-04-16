@@ -16,9 +16,10 @@
           >
           {% include 'includes/fields.html' %}
           <div class="col-md-6 offset-md-4">
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary my-1">
               Войти
             </button>
+            <a href="{% url 'users:signup' %}" class="btn btn-primary my-1">Зарегистрироваться</a>
             <a href="{% url 'users:password_reset_form' %}" class="btn btn-link">
               Забыли пароль?
             </a>
